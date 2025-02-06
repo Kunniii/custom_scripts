@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ "$1" == "up" || "$1" == "u" ]]; then
+  echo "Starting WireGuard VPN"
+  sudo wg-quick up wg0
+elif [[ "$1" == "down" || "$1" == "d" ]]; then
+  echo "Stopping WireGuard VPN"
+  sudo wg-quick down wg0
+else
+  echo "Invalid argument. Use 'up/u' or 'down/d'."
+fi
