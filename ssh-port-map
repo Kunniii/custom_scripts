@@ -1,35 +1,59 @@
 #!/bin/bash
 
 usage() {
-    echo "Usage: $0 [--dry] -R|-L <port> [target_port] <hostname>"
-    exit 1
+  echo "Usage: $0 [--dry] -m R|L -h <hostname> <local_port> [-t <target_port>]"
+  exit 1
 }
 
 DRY_RUN=false
+MODE=""
+HOST=""
+TARGET_PORT=""
 
-if [[ "$1" == "--dry" ]]; then
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  --dry)
     DRY_RUN=true
     shift
+    ;;
+  -m)
+    MODE="$2"
+    shift 2
+    ;;
+  -h)
+    HOST="$2"
+    shift 2
+    ;;
+  -t)
+    TARGET_PORT="$2"
+    shift 2
+    ;;
+  *)
+    if [[ -z "$LOCAL_PORT" ]]; then
+      LOCAL_PORT="$1"
+      shift
+    else
+      usage
+    fi
+    ;;
+  esac
+done
+
+if [[ -z "$MODE" || -z "$HOST" || -z "$LOCAL_PORT" ]]; then
+  usage
 fi
 
-if [[ $# -lt 3 || $# -gt 4 ]]; then
-    usage
+if [[ "$MODE" != "R" && "$MODE" != "L" ]]; then
+  usage
 fi
 
-MODE=$1
-PORT=$2
-HOST=$3
-TARGET_PORT=${4:-$2}
+MODE="-$MODE"
+TARGET_PORT=${TARGET_PORT:-$LOCAL_PORT}
 
-if [[ "$MODE" != "-R" && "$MODE" != "-L" ]]; then
-    usage
-fi
-
-COMMAND="ssh $MODE $PORT:localhost:$TARGET_PORT $HOST"
+COMMAND="ssh $MODE $LOCAL_PORT:localhost:$TARGET_PORT $HOST"
 
 if $DRY_RUN; then
-    echo "$COMMAND"
+  echo "$COMMAND"
 else
-    eval "$COMMAND"
+  eval "$COMMAND"
 fi
-
