@@ -1,0 +1,35 @@
+#!/bin/bash
+
+usage() {
+    echo "Usage: $0 [--dry] -R|-L <port> [target_port] <hostname>"
+    exit 1
+}
+
+DRY_RUN=false
+
+if [[ "$1" == "--dry" ]]; then
+    DRY_RUN=true
+    shift
+fi
+
+if [[ $# -lt 3 || $# -gt 4 ]]; then
+    usage
+fi
+
+MODE=$1
+PORT=$2
+HOST=$3
+TARGET_PORT=${4:-$2}
+
+if [[ "$MODE" != "-R" && "$MODE" != "-L" ]]; then
+    usage
+fi
+
+COMMAND="ssh $MODE $PORT:localhost:$TARGET_PORT $HOST"
+
+if $DRY_RUN; then
+    echo "$COMMAND"
+else
+    eval "$COMMAND"
+fi
+
