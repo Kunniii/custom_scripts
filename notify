@@ -7,15 +7,17 @@ fi
 
 cmd="$@"
 
-output=$(bash -c "cd $(pwd) && $cmd" 2>&1 | tee /dev/tty)
+# Ensure the script runs in the caller's directory
+cwd="$PWD"
+
+gotify p "Running: $cmd"
+
+# Run the command and capture output while keeping it visible
+output=$(bash -c "cd $cwd && $cmd" 2>&1 | tee /dev/tty)
 exit_code=$?
 
 if [ $exit_code -eq 0 ]; then
-  title="Command Completed"
-  message="$cmd finished successfully."
+  gotify p "Success: $cmd"
 else
-  title="Command Failed"
-  message="$cmd failed with exit code $exit_code. Error: $output"
+  gotify p "Failed: $cmd (exit $exit_code) - Error: $output"
 fi
-
-notify-send "$title" "$message"
